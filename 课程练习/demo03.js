@@ -1,63 +1,31 @@
-// 访问器属性 实例一
-var o = {
-    _x:1.0,
-    get x(){
-        return this._x;
-    },
-    set x(val){
-        this._x = val;
-    }
+// ES5 中实现函数参数默认值的方法
+var sum = function(a,b,c){
+    b = b||4;
+    c = c||5;
+    return a+b+c;
 };
-console.log(o.x);//1
-o.x = 2;
-console.log(o.x,o._x);//2 2
+console.log(sum(1,2,3));//1+2+3
+console.log(sum(1,2));//1+2+5
+console.log(sum(1));//1+4+5
+console.log(sum(1,0,0));//本应为1+0+0，但此处为1+4+5，代码有问题需优化，优化如下
 
-
-//访问器属性 实例二 只读
-var o = {
-    _x:1.0,
-    get x(){
-        return this._x;
-    }
+//优化改造版本
+var sum = function(a,b,c){
+    if(b!=false){b = b||4;}//(b!=false)&&(b=b||4);
+    if(c!=false){c = c||5;}//(c!=false)&&(c=c||5);
+    return a+b+c;
 };
-console.log(o.x);//1
-o.x = 2;
-console.log(o.x,o._x);
+console.log(sum(1,2,3));//1+2+3
+console.log(sum(1,2));//1+2+5
+console.log(sum(1));//1+4+5
+console.log(sum(1,0,0));//1+0+0
 
-// 访问器属性 实例三
-var p1 = {
-    _name:"Jack",
-    _age:23,
-    set age(val){
-        if(val>0&&val<150){
-            this._age = val;
-        }else{
-            console.log("请设置正常年龄");
-        }
-    },
-    get age(){
-        return this._age;
-    }
+
+// ES6 中实现函数参数默认值的方法 ,使用babble查看ES5的写法
+var sum = function(a,b=4,c=5){
+    return a+b+c;
 };
-p1.age = 178;
-console.log(p1.age);
-
-
-//访问器属性 综合实例
-var p ={
-    x:1,
-    y:1,
-    get r(){return Math.sqrt(this.x*this.x+this.y*this.y);},
-    set r(newValue){
-        var oldValue = Math.sqrt(this.x*this.x+this.y*this.y);
-        var ratio = newValue/oldValue;
-        this.x*=ratio;
-        this.y*=ratio;
-    },
-    get theta(){return Math.atan2(this.y,this.x);}
-};
-var q = Object.create(p);
-q.x = 2;
-q.y = 2;
-console.log(q.r);
-console.log(q.theta);
+console.log(sum(1,2,3));//1+2+3
+console.log(sum(1,2));//1+2+5
+console.log(sum(1));//1+4+5
+console.log(sum(1,0,0));//1+0+0

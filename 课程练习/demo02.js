@@ -1,38 +1,113 @@
+// Part1 方法中的函数嵌套 this缺陷
+var point = {
+    x:0,
+    y:0,
+    moveTo:function (x,y) {
+        //内部嵌套函数
+        function moveToX() {
+            this.x = x;//this绑定到了哪里？
+        }
+        //内部嵌套函数
+        function moveToY() {
+            this.y = y;//this绑定到了哪里？
+        }
+        moveToX();
+        moveToY();
+    }
+};
+point.moveTo(2,2);
+console.log(point);
+//console.log(window.x,window.y);
 
-var i = new String("str");          // Object
-var h = new Number(1);              // Object
-var g = new Boolean(true);          // Object
-var j = new Object({name : "Tom"}); // Object
-var k = new Array([1, 2, 3, 4]);    // Object
-var l = new Date();                 // Object
-var m = new Error();
-var n = new Function();
-var o = new RegExp("\\d");
 
-console.log(typeof Array);
-console.log(typeof Function);
-console.log(typeof Date);
-console.log(typeof Number);
-console.log(typeof String);
-console.log(typeof Boolean);
-console.log(typeof Math);
-console.log(typeof JSON);
+// Part2 方法中的函数嵌套 this缺陷 ES5中通过软绑定解决办法
+var point = {
+    x:0,
+    y:0,
+    moveTo:function (x,y) {
+        var that = this;//关键的一行，软绑定
+        //内部嵌套函数
+        function moveToX() {
+            that.x = x;//this改为that
+        }
+        //内部嵌套函数
+        function moveToY() {
+            that.y = y;//this绑定到了哪里？
+        }
+        moveToX();
+        moveToY();
+    }
+};
+point.moveTo(2,2);
+console.log(point);
+//console.log(window.x,window.y);
 
-console.log(Object instanceof Function);
-console.log(Object instanceof Object);
-console.log(Boolean instanceof Function);
-console.log(Boolean instanceof Object);
-console.log(String instanceof Function);
-console.log(String instanceof Object);
-console.log(Number instanceof Function);
-console.log(Number instanceof Object);
-console.log(Function instanceof Function);
-console.log(Function instanceof Object);
-console.log(Array instanceof Function);
-console.log(Array instanceof Object);
-console.log(Date instanceof Function);
-console.log(Date instanceof Object);
-console.log(Math instanceof Function);
-console.log(Math instanceof Object);
-console.log(JSON instanceof Function);
-console.log(JSON instanceof Object);
+//思考并回顾：如何用call或apply间接调用的方法解决this指向问题？？？
+
+//ES6中 箭头函数中this是与函数定义时所在的对象绑定，而不是使用时所在的对象（避免this缺陷）
+//箭头函数导致this总是指向函数定义生效时所在的对象
+var point = {
+    x:0,
+    y:0,
+    moveTo:function (x,y) {
+        //内部嵌套函数
+        var moveToX = ()=>this.x=x;
+        //内部嵌套函数
+        var moveToY = ()=>this.y=y;
+        moveToX();
+        moveToY();
+    }
+};
+point.moveTo(2,2);
+console.log(point);
+//console.log(window.x,window.y);
+
+//
+// 箭头函数有几个使用注意点。
+// （1）函数体内的this对象，就是定义时所在的对象，而不是使用时所在的对象。
+// （2）不可以当作构造函数，也就是说，不可以使用new命令，否则会抛出一个错误。
+// （3）不可以使用arguments对象，该对象在函数体内不存在。如果要用，可以用Rest参数代替。
+// （4）不可以使用yield命令，因此箭头函数不能用作Generator函数
+
+//思考函数中的this ES5中如何解决
+function foo() {
+    setTimeout(function(){
+        console.log('id:', this.id);
+    }, 100);
+}
+var id = 21;
+foo.call({ id: 42 });// id: 21
+
+//查看下例中箭头函数的写法和结果
+function foo() {
+    setTimeout(() => {
+        console.log('id:', this.id);
+    }, 100);
+}
+var id = 21;
+foo.call({ id: 42 });// id: 42
+
+//由于箭头函数没有自己的this，所以当然也就不能用call()、apply()、bind()这些方法去改变this的指向
+function foo() {
+    return () => {
+        return () => {
+            return () => {
+                console.log('id:', this.id);
+            };
+        };
+    };
+}
+var f = foo.call({id: 1});
+var t1 = f.call({id: 2})()(); // id: 1
+var t2 = f().call({id: 3})(); // id: 1
+var t3 = f()().call({id: 4}); // id: 1
+
+//需要特别注意：由于大括号被解释为代码块，所以如果箭头函数直接返回一个对象，必须在对象外面加上小括号
+var getTempItem = itemId => ({ id: itemId, name: "Temp" });
+//getTempItem(23);
+
+//等效于
+var getTempItem = function (itemId) {
+    return { id: itemId, name: "Temp" }
+};
+//getTempItem(23);

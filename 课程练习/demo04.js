@@ -1,47 +1,26 @@
-//通过字面量的方式创建对象
-var obj = {
-    num:10,
-    str:"Hi",
-    show:function(){
-        return this.str;
-    }
-};
-console.log(obj.num);
-console.log(obj.str);
-console.log(obj.show());
-console.log(obj.__proto__);
-console.log(obj.__proto__ === Object.prototype);
-
-//通过Object工场方法创建JS对象
-var newObj = Object.create(obj);
-newObj.age = 23;
-console.log(newObj.num);
-console.log(newObj.str);
-console.log(newObj.show());
-console.log(newObj.age);
-console.log(newObj.__proto__);
-console.log(newObj.__proto__ === obj);
-
-//构造函数的方式创建JS对象
-function Person(name,age){
-    this.name = name;
-    this.age = age;
+// Part 1
+function foo(x=5){
+    let x = 1;//报错
+    const x = 2;//报错
+    var x = 3;//正常
 }
-Person.prototype.sayName = function(){
-    console.log("hello,i'm",this.name,this.age,"years old");
-};
-var person1 = new Person("Mike",21);
-person1.sayName();
+foo();
 
 
-var objStr = new Object("xxx");
-console.log(typeof objStr);//object
-console.log(objStr instanceof String);//true
+// Part 2
+//默认值顺序，参数一般有顺序，有默认值的参数应该是尾参数
+//否则无法使有默认值的用默认值，没有默认值的用传递的参数
+function f(x = 1,y) {
+    return [x,y];
+}
+f();//[1,undefined]
+f(2);//[2,undefined]
+f(,3);//报错，无法使x用1，y用3
 
-var objNum = new Object(23);
-console.log(typeof objNum);//object
-console.log(objNum instanceof Number);//true
 
-var objBoolean = new Object(true);
-console.log(typeof objBoolean);//object
-console.log(objBoolean instanceof Boolean);//true
+//所以有默认值的参数在最后
+function f(x,y = 1) {
+    return [x,y];
+}
+f();//[undefined, 1]
+f(2);//[2, 1] 这样就可以x为传递的参数，y为默认的值
